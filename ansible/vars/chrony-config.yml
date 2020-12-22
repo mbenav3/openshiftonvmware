@@ -1,0 +1,10 @@
+---
+chronyconfig:
+  - server: 0.us.pool.ntp.org
+    options: iburst
+  - server: 1.us.pool.ntp.org
+    options: iburst 
+  - server: 2.us.pool.ntp.org
+    options: iburst 
+  - server: 3.us.pool.ntp.org
+    options: iburst 

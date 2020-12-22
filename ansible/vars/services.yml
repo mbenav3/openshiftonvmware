@@ -1,0 +1,12 @@
+services:
+
+- service: http
+  zone: internal 
+- service: http
+  zone: external 
+
+- service: https
+  zone: internal 
+- service: https
+  zone: external 
+  

@@ -1,0 +1,128 @@
+---
+# tasks file to configure internal and external network interfaces_file
+- hosts: all
+  vars_files:
+    - ../vars/bastion-network-config.yml 
+    - ../vars/ports.yml
+    - ../vars/services.yml
+  handlers:
+  - import_tasks: ../handlers/bastion-network-handlers.yml
+  
+  tasks:
+  - name: Install needed network manager libraries
+    ansible.builtin.package:
+      name:
+        - NetworkManager-libnm
+        - nm-connection-editor
+        - python3-policycoreutils
+        - python3-libselinux
+        - python3-libsemanage
+      state: present
+  
+  - name: Update the private network interface with a static IP configuration
+    community.general.nmcli:
+      conn_name: "{{ bastion.private_network.networkifacename }}"
+      ifname: "{{ bastion.private_network.networkifacename }}"
+      ip4: "{{ bastion.private_network.ipaddr }}/{{ bastion.private_network.prefix }}"
+      # dns4: 
+      #   - "{{ bastion.private_network.dns }}"
+      # dns4_search: 
+      #   - "{{ bastion.cluster_domain }}"
+      autoconnect: "{{ bastion.private_network.auto_connect }}"
+      state: present
+      
+      # TODO: Delegate zone and default route connection modifications to this 
+      # Ansible collection following the next release
+      
+      # zone: "{{ bastion.private_network.zone }}"
+      # never_default4: "{{ bastion.private_network.never_default }}"
+  
+  - name: Update the public network interface with a static IP configuration
+    community.general.nmcli:
+      conn_name: "{{ bastion.public_network.networkifacename }}"
+      ifname: "{{ bastion.public_network.networkifacename }}"
+      ip4: "{{ bastion.public_network.ipaddr }}/{{ bastion.public_network.prefix }}"
+      gw4: "{{ bastion.public_network.gateway4 }}"
+      # dns4: 
+      #   - "{{ bastion.public_network.dns }}"
+      # dns4_search: 
+      #   - "{{ bastion.cluster_domain }}"
+      autoconnect: "{{ bastion.public_network.auto_connect }}"
+      state: present
+      
+      # TODO: Delegate zone and default route connection modifications to this 
+      # Ansible collection following the next release
+       
+      # zone: "{{ bastion.public_network.zone }}"
+      # never_default4: "{{ bastion.public_network.never_default }}"
+      
+      
+  - name: Define the interface "{{ bastion.private_network.networkifacename }}" as an "{{ bastion.private_network.zone }}" zone
+    shell: 'nmcli con mod  "{{ bastion.private_network.networkifacename }}" connection.zone "{{ bastion.private_network.zone }}"'
+    
+  - name: Define the interface "{{ bastion.public_network.networkifacename }}" as an "{{ bastion.public_network.zone }}" zone
+    shell: 'nmcli con mod  "{{ bastion.public_network.networkifacename }}" connection.zone "{{ bastion.public_network.zone }}"'
+    
+  - name: update the search domain for the "{{ bastion.public_network.zone }}" zone
+    shell: 'nmcli con mod "{{ bastion.public_network.networkifacename }}" ipv4.dns-search "{{ bastion.public_network.dns }}"'
+    
+  - name: update the search domain for the "{{ bastion.private_network.zone }}" zone
+    shell: 'nmcli con mod "{{ bastion.private_network.networkifacename }}" ipv4.dns-search "{{ bastion.private_network.dns }}"'
+    
+  - name: update the dns for the "{{ bastion.public_network.zone }}" zone
+    shell: 'nmcli con mod "{{ bastion.public_network.networkifacename }}" ipv4.dns "{{ bastion.public_network.dns }}"'
+    
+  - name: update the dns for the "{{ bastion.private_network.zone }}" zone
+    shell: 'nmcli con mod "{{ bastion.private_network.networkifacename }}" ipv4.dns "{{ bastion.private_network.dns }}"'
+  
+  - name: Prevent the private network interface from receiving a default route 
+    shell: 'nmcli con mod  "{{ bastion.private_network.networkifacename }}" ipv4.never-default "{{ bastion.private_network.never_default }}"'
+    notify:
+      - restart NetworkManager
+      
+  - name: Enable masquerading on the public zone
+    firewalld:
+      masquerade: "yes"
+      state: enabled
+      permanent: yes
+      immediate: yes
+      zone: "{{ bastion.public_network.zone }}"
+  
+  - name: Enable masquerading on the private zone
+    firewalld:
+      masquerade: "yes"
+      state: enabled
+      permanent: yes
+      immediate: yes
+      zone: "{{ bastion.private_network.zone }}"
+      
+  - name: Update the firewall config allowing communication through the required PORTS
+    firewalld:
+      permanent: yes
+      immediate: yes
+      state: enabled
+      port: "{{ item[0].port }}"
+      zone: "{{ item[0].zone }}"
+    delegate_to: "{{ item[1] }}"
+    run_once: true
+    with_nested:
+      - "{{ ports }}"
+      - "{{ ansible_play_batch }}"
+      
+  - name: Update the firewall config allowing communication through the required SERVICES
+    firewalld:
+      permanent: yes
+      immediate: yes
+      state: enabled
+      service: "{{ item[0].service }}"
+      zone: "{{ item[0].zone }}"
+    delegate_to: "{{ item[1] }}"
+    run_once: true
+    with_nested:
+      - "{{ services }}"
+      - "{{ ansible_play_batch }}"
+      
+  - name: reload service firewalld
+    systemd:
+      name: firewalld
+      state: reloaded

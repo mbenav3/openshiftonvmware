@@ -1,0 +1,8 @@
+---
+nfs:
+  server: "127.0.0.1"
+  path: "/export/shares/registry"
+  network: "10.95.106.64/26"
+  options: "(rw,sync,root_squash)"
+  owner: "nobody"
+  group: "nobody"

@@ -1,0 +1,20 @@
+---
+- block:
+    - set_fact:
+        packages:
+          - nfs-utils
+    
+    - set_fact:
+        nfs_path: "{{ nfs.path }}"
+        nfs_owner: "{{ nfs.owner }}"
+        nfs_group: "{{ nfs.group }}"
+      
+    - set_fact:
+        services_enable:
+          - nfs-server
+          - rpcbind
+        services_start:
+          - nfs-server
+          - rpcbind 
+          - nfs-mountd
+          

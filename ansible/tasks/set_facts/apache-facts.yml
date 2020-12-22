@@ -1,0 +1,9 @@
+---
+- block:
+    - set_fact:
+        packages:
+          - httpd
+
+    - set_fact:
+        services:
+          - httpd 

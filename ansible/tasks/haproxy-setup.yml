@@ -1,0 +1,38 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/cluster-network-config.yml 
+  handlers:
+  - import_tasks: ../handlers/haproxy-handlers.yml
+
+  tasks:
+  - name: Define facts for the haproxy load balancer
+    include: set_facts/haproxy-facts.yml
+  
+  - name: Install the haproxy package as defined in facts
+    package:
+      name: "{{ packages }}"
+      state: present
+      
+  - name: Build the haproxy config from template
+    template:
+      src: ../templates/haproxy.cfg.j2
+      dest: /etc/haproxy/haproxy.cfg
+    notify:
+      - restart haproxy
+      
+  - name: SEBool allow haproxy connect any port
+    seboolean:
+      name: haproxy_connect_any
+      state: yes
+      persistent: yes
+    notify:
+      - restart haproxy
+    
+  - name: Enable the haproxy service
+    service:
+      name: "{{ item }}"
+      enabled: yes
+      state: started
+    with_items:
+      - "{{ services }}"

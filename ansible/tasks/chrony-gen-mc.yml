@@ -1,0 +1,36 @@
+---
+- hosts: all
+  vars_files: 
+    - ../vars/chrony-config.yml
+    - ../vars/cluster-network-config.yml
+  tasks:
+    - name: Create folder for additional machineconfig
+      file:
+        path: ../machineconfig
+        state: directory
+
+    - name: Create temporary chrony.conf file
+      template:
+        src: ../templates/chrony.conf.j2
+        dest: /tmp/chrony.conf.tmp
+
+    - name: base64 contents of temporary chrony.conf file
+      slurp:
+        src: /tmp/chrony.conf.tmp
+      register: chronybase64
+
+    - name: Generate Chrony machineconfig
+      template:
+        src: ../templates/chrony-machineconfig.j2
+        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+      loop:
+        - master
+    - name: Generate Chrony machineconfig
+      template:
+        src: ../templates/chrony-machineconfig.j2
+        dest: ../machineconfig/99-{{item}}-chrony-configuration.yaml
+      loop:
+        - worker
+      when:
+        - workers is defined
+        - workers | length > 0

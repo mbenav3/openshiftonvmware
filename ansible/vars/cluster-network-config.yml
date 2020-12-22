@@ -1,0 +1,27 @@
+---
+bastion:
+  name: "bastion"
+  ipaddr: "10.95.106.77"
+  networkifacename: "ens192"
+dns:
+  domain: "democore.cloud"
+  clusterid: "mas-us-42"
+  forwarder1: "8.8.8.8" 
+  forwarder2: "8.8.4.4"
+bootstrap:
+  name: "bootstrap"
+  ipaddr: "10.95.106.80"
+masters:
+  - name: "control-plane-1"
+    ipaddr: "10.95.106.86"
+  - name: "control-plane-2"
+    ipaddr: "10.95.106.87"
+  - name: "control-plane-3"
+    ipaddr: "10.95.106.88"
+workers:
+  - name: "compute-plane-1"
+    ipaddr: "10.95.106.78"
+  - name: "compute-plane-2"
+    ipaddr: "10.95.106.79"
+    
+    

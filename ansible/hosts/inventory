@@ -1,0 +1,11 @@
+[vmhost]
+localhost ansible_connection=local
+
+; NOTE: 
+; If executing ansible from a remote host, uncomment the line below and replace:
+; - REPLACEWITH_HOST_ADDRESS with the FQDN or IP address of the host to serve as the bastion node
+; - REPLACEWITH_HOST_USERNAME with the ssh username of the host to serve as the bastion node
+
+; remote_bastion_vm ansible_connection=ssh ansible_host=REPLACEWITH_HOST_ADDRESS ansible_user=REPLACEWITH_HOST_USERNAME
+
+; remote_bastion_vm ansible_connection=ssh ansible_host=150.238.18.5 ansible_user=root

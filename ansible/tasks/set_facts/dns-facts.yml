@@ -1,0 +1,19 @@
+---
+- block:
+    - assert:
+        that: "{{ bastion.networkifacename is defined }}"
+    - set_fact:
+        networkifacename: "{{ bastion.networkifacename }}"
+  rescue:
+    - set_fact:
+        networkifacename: "{{ ansible_default_ipv4.interface }}"
+
+- block:
+    - set_fact:
+        packages:
+          - bind
+          - bind-utils 
+
+    - set_fact:
+        services:
+          - named 

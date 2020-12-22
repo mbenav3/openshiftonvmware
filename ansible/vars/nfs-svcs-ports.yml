@@ -1,0 +1,8 @@
+allow_services:
+
+- service: mountd
+  zone: internal 
+- service: rpc-bind
+  zone: internal 
+- service: nfs
+  zone: internal 

@@ -1,0 +1,9 @@
+---
+- block:
+    - set_fact:
+        packages:
+          - haproxy
+
+    - set_fact:
+        services:
+          - haproxy 

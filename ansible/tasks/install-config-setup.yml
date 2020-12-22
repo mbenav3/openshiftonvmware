@@ -1,0 +1,14 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/cluster-network-config.yml
+  vars:
+    pullSecretOCP: "{{ lookup('file','~/.openshift/pull-secret') }}"
+    sshKeyOCP: "{{ lookup('file','~/.ssh/id_rsa.pub') }}"
+    debug: msg="{{ lookup('vars', 'variabl' + myvar) }}"
+  
+  tasks:
+  - name: Build the install config from template
+    template:
+      src: ../templates/install-config.yml.j2
+      dest: ../install-config.yaml

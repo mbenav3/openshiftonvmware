@@ -1,0 +1,57 @@
+ports:
+- port: 53/tcp
+  zone: internal 
+- port: 53/tcp
+  zone: external   
+
+- port: 53/udp
+  zone: internal   
+- port: 53/udp
+  zone: external
+  
+- port: 443/tcp
+  zone: internal
+- port: 443/tcp
+  zone: external
+  
+- port: 80/tcp
+  zone: internal
+- port: 80/tcp
+  zone: external
+  
+- port: 8080/tcp
+  zone: internal
+  
+- port: 6443/tcp
+  zone: internal
+- port: 6443/tcp
+  zone: external
+  
+- port: 6443/udp
+  zone: internal
+- port: 6443/udp
+  zone: external
+  
+- port: 22623/tcp
+  zone: internal
+  
+- port: 22623/udp
+  zone: internal
+  
+- port: 9000/tcp
+  zone: external
+  
+- port: 111/tcp
+  zone: external
+- port: 111/tcp
+  zone: internal
+  
+- port: 2049/tcp
+  zone: internal
+- port: 2049/tcp
+  zone: external
+  
+- port: 20048/tcp
+  zone: internal
+- port: 20048/tcp
+  zone: external
