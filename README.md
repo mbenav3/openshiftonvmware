@@ -310,8 +310,6 @@ Prevent pods from being scheduled on the control plane nodes
 sed -i 's/mastersSchedulable: true/mastersSchedulable: false/g' ~/ocp-install-wd/cluster-configs/manifests/cluster-scheduler-02-config.yml
 ```
 
-Download the 
-
 ## Create the ignition configs
 
 ```bash
@@ -418,4 +416,26 @@ ansible all -i localhost, -m setup -c local localhost
 
  ```bash
  ansible-playbook [playbook] -vvvvv
+ ```
+ 
+ ## Redeploying the cluster
+ 
+ Delete the Apache server
+ 
+ ```console
+ yum list installed "httpd*"
+ 
+ yum remove "httpd*" -y
+ 
+ rm -rf /var/www
+ 
+ rm -rf /etc/httpd
+ 
+ rm -rf /usr/lib64/httpd
+ 
+ userdel -r apache
+ 
+ grep "apache" /etc/passwd
+ 
+ systemctl status httpd
  ```
