@@ -1,8 +1,14 @@
 ---
 nfs:
-  server: "127.0.0.1"
-  path: "/export/shares/registry"
-  network: "10.95.106.64/26"
-  options: "(rw,sync,root_squash)"
-  owner: "nobody"
-  group: "nobody"
+  server: "10.95.106.77"
+  mount_drive:
+    name: "sdb"
+    allocate_start_pct: "0"
+    allocate_end_pct: "100"
+    partition_num: "1"
+  shares:
+      path: "/export/shares/ocp-nfs"
+      network: "10.95.106.64/26"
+      options: "(rw,sync,root_squash)"
+      owner: "nobody"
+      group: "nobody"

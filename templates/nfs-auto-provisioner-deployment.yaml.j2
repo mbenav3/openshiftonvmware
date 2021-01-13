@@ -2,38 +2,37 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: nfs-client-provisioner
+  labels:
+    app: nfs-client-provisioner
+  namespace: NFS_PROVISIONER_NAMESPACE
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: nfs-client-provisioner
-  strategy:
-    type: Recreate
   template:
     metadata:
       labels:
-        app: nfs-client-provisioner 
+        app: nfs-client-provisioner
     spec:
       serviceAccountName: nfs-client-provisioner
       containers:
         - name: nfs-client-provisioner
-{% if ansible_architecture == "ppc64le" %}
-          image: ibmcom/nfs-client-provisioner-ppc64le:latest
-{% else %}
           image: quay.io/external_storage/nfs-client-provisioner:latest
-{% endif %}
           volumeMounts:
             - name: nfs-client-root
               mountPath: /persistentvolumes
           env:
             - name: PROVISIONER_NAME
-              value: nfs-storage
+              value: NFS_PROVISIONER_NAME
             - name: NFS_SERVER
               value: {{ nfs.server | default(127.0.0.1) }}
             - name: NFS_PATH
-              value: {{ nfs.path | default('/export') }}
+              value: {{ nfs.shares.path | default('/export') }}
       volumes:
         - name: nfs-client-root
           nfs:
             server: {{ nfs.server | default(127.0.0.1) }}
-            path: {{ nfs.path | default('/export') }}
+            path: {{ nfs.shares.path | default('/export') }}

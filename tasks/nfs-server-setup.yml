@@ -1,0 +1,75 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/nfs-svcs-ports.yml 
+    - ../vars/nfs-config.yml 
+  handlers:
+    - import_tasks: ../handlers/nfs-handlers.yml
+
+  tasks:
+    - name: Define facts for the nfs server
+      include: set_facts/nfs-facts.yml
+    
+    - name: Install the nfs package as defined in facts
+      package:
+        name: "{{ packages }}"
+        state: present
+        
+    - name: Create partition and file system
+      shell: |
+        parted -s -a optimal -- /dev/{{ nfs.mount_drive.name }} mklabel gpt
+        sudo parted -s -a optimal -- /dev/{{ nfs.mount_drive.name }} mkpart primary {{ nfs.mount_drive.allocate_start_pct }}% {{ nfs.mount_drive.allocate_end_pct }}%
+        sudo parted -s -- /dev/{{ nfs.mount_drive.name }} align-check optimal {{ nfs.mount_drive.partition_num }}
+        sudo mkfs.xfs /dev/{{ nfs.mount_drive.name }}{{ nfs.mount_drive.partition_num }}
+        
+    - name: Create the NFS shares directories
+      file:
+        path: "{{ nfs.shares.path }}"
+        state: directory
+        mode: 0777
+        owner: "{{ nfs.shares.owner }}"
+        group: "{{ nfs.shares.group }}"
+      notify:
+        - restart nfs
+        
+    - name: Mount the disk to the NFS export directory
+      shell: |
+        echo "/dev/{{ nfs.mount_drive.name }}{{ nfs.mount_drive.partition_num }} {{ nfs.shares.path }} xfs defaults 0 0" | sudo tee -a /etc/fstab
+        sudo mount -a
+    
+    - name: Create nfs-exports config file from template
+      template:
+        src: ../templates/nfs-exports.conf.j2
+        dest: "/etc/exports"
+        owner: root
+        group: root
+        mode: 0666
+        
+    - name: export the file system defined in the /etc/exports configuration file
+      shell: 'exportfs -arv'
+    
+    - name: Enable the nfs service
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      with_items:
+        - "{{ services_enable }}"
+
+    - name: Update the firewall config allowing communication through the required services
+      firewalld:
+        permanent: yes
+        immediate: yes
+        state: enabled
+        service: "{{ item[0].service }}"
+        zone: "{{ item[0].zone }}"
+      delegate_to: "{{ item[1] }}"
+      run_once: true
+      with_nested:
+        - "{{ allow_services }}"
+        - "{{ ansible_play_batch }}"
+
+    - name: reload service firewalld
+      systemd:
+        name: firewalld
+        state: reloaded

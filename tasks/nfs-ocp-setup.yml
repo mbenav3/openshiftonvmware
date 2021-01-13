@@ -1,0 +1,46 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/nfs-config.yml 
+
+  tasks:
+    - name: Copy nfs-provisioner rbac file
+      copy:
+        src: ../files/nfs-auto-provisioner-rbac.yaml
+        dest: /usr/local/src/nfs-auto-provisioner-rbac.yaml
+        owner: root
+        group: root
+        mode: 0666
+    
+    - name: Create the nfs-provisioner deployment config file from template
+      template:
+        src: ../templates/nfs-auto-provisioner-deployment.yaml.j2
+        dest: /usr/local/src/nfs-auto-provisioner-deployment.yaml
+        owner: root
+        group: root
+        mode: 0666
+
+    - name: Copy the nfs-provisioner storageclass
+      copy:
+        src: ../files/nfs-auto-provisioner-sc.yaml
+        dest: /usr/local/src/nfs-auto-provisioner-sc.yaml
+        owner: root
+        group: root
+        mode: 0666
+
+    - name: Copy the nfs-provisioner setup script
+      copy:
+        src: ../files/nfs-auto-provisioner-setup.sh
+        dest: /usr/local/bin/nfs-auto-provisioner-setup.sh
+        owner: root
+        group: root
+        mode: 0555
+        
+    - name: Copy the sample PVC file for NFS
+      copy:
+        src: ../files/nfs-registry-pvc.yaml
+        dest: /usr/local/src/nfs-registry-pvc.yaml
+        mode: '0555'
+    
+    - name: Create an instance of the nfs provisioner
+      shell: '/usr/local/bin/nfs-provisioner-setup.sh --nfssharedir {{ nfs.shares[0].name }} --ocpns nfs-provisioner --nfsprovisionername nfs-storage --nfsprovisionernamespace nfs-auto-provisioner'
