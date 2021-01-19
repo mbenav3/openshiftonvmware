@@ -1,0 +1,22 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/nfs-config.yml 
+   
+  tasks:
+    - name: Copy the test PVC file to test the NFS server
+      copy:
+        src: ../files/tests/nfs-pvc-test.yaml
+        dest: /usr/local/src/nfs-pvc-test.yaml
+        mode: '0555'
+        
+    - name: Copy the test pod file to test our pvc
+      copy:
+        src: ../files/tests/nfs-test-pod.yaml
+        dest: /usr/local/src/nfs-test-pod.yaml
+        mode: '0555'
+        
+    - name: Create the test pvc and test pod
+      shell: |
+        oc create -f /usr/local/src/nfs-pvc-test.yaml
+        oc create -f /usr/local/src/nfs-test-pod.yaml

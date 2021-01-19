@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels: 
+    run: ubuntu
+  name: ubuntu-test-nfs
+  namespace: default
+spec:
+  containers:
+  - image: ubuntu
+    name: ubuntu
+    resources: {}
+    command: ["sleep", "3600"]
+    volumeMounts:
+      - mountPath: /nfs
+        name: nfs-vol
+  volumes:
+    - name: nfs-vol
+      persistentVolumeClaim:
+        claimName: test-nfs-provisioner

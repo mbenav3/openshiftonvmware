@@ -3,9 +3,8 @@ kind: PersistentVolumeClaim
 metadata:
   name: registry-pvc
 spec:
-  storageClassName: managed-nfs-storage
   accessModes:
   - ReadWriteMany
-  resources:
+  resources: 
     requests:
-      storage: 20Gi 
+      storage: 20Gi

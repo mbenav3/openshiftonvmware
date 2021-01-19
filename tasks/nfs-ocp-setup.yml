@@ -2,12 +2,13 @@
 - hosts: all
   vars_files:
     - ../vars/nfs-config.yml 
-
+   
   tasks:
     - name: Copy nfs-provisioner rbac file
       copy:
         src: ../files/nfs-auto-provisioner-rbac.yaml
         dest: /usr/local/src/nfs-auto-provisioner-rbac.yaml
+        remote_src: yes
         owner: root
         group: root
         mode: 0666
@@ -16,6 +17,7 @@
       template:
         src: ../templates/nfs-auto-provisioner-deployment.yaml.j2
         dest: /usr/local/src/nfs-auto-provisioner-deployment.yaml
+        remote_src: yes
         owner: root
         group: root
         mode: 0666
@@ -24,6 +26,7 @@
       copy:
         src: ../files/nfs-auto-provisioner-sc.yaml
         dest: /usr/local/src/nfs-auto-provisioner-sc.yaml
+        remote_src: yes
         owner: root
         group: root
         mode: 0666
@@ -32,15 +35,10 @@
       copy:
         src: ../files/nfs-auto-provisioner-setup.sh
         dest: /usr/local/bin/nfs-auto-provisioner-setup.sh
+        remote_src: yes
         owner: root
         group: root
         mode: 0555
-        
-    - name: Copy the sample PVC file for NFS
-      copy:
-        src: ../files/nfs-registry-pvc.yaml
-        dest: /usr/local/src/nfs-registry-pvc.yaml
-        mode: '0555'
     
     - name: Create an instance of the nfs provisioner
-      shell: '/usr/local/bin/nfs-provisioner-setup.sh --nfssharedir {{ nfs.shares[0].name }} --ocpns nfs-provisioner --nfsprovisionername nfs-storage --nfsprovisionernamespace nfs-auto-provisioner'
+      shell: '/usr/local/bin/nfs-auto-provisioner-setup.sh --nfssharedir /export/shares/ocp-nfs --ocpns nfs-storage-provider --nfsprovisionername nfs-auto-provisioner'

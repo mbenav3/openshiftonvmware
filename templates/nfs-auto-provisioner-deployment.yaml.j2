@@ -4,7 +4,7 @@ metadata:
   name: nfs-client-provisioner
   labels:
     app: nfs-client-provisioner
-  namespace: NFS_PROVISIONER_NAMESPACE
+  namespace: NFS_NS
 spec:
   replicas: 1
   strategy:
@@ -26,7 +26,7 @@ spec:
               mountPath: /persistentvolumes
           env:
             - name: PROVISIONER_NAME
-              value: NFS_PROVISIONER_NAME
+              value: NFS_PROV_NM
             - name: NFS_SERVER
               value: {{ nfs.server | default(127.0.0.1) }}
             - name: NFS_PATH

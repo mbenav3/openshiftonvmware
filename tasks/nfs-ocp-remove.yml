@@ -1,0 +1,17 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/nfs-config.yml 
+   
+  tasks:
+    - name: Copy the nfs-provisioner setup script
+      copy:
+        src: ../files/nfs-auto-provisioner-delete.sh
+        dest: /usr/local/bin/nfs-auto-provisioner-delete.sh
+        remote_src: yes
+        owner: root
+        group: root
+        mode: 0555
+    
+    - name: Delete nfs provisioner
+      shell: '/usr/local/bin/nfs-auto-provisioner-delete.sh'

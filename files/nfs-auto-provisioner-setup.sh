@@ -1,7 +1,7 @@
 #!/bin/bash
 nfssharedir=${nfssharedir:''} #The name of the nfs share folder in the nfs server's nfs shares directory
 ocpns=${ocpns:''} # The name of the project where this nfs provisioning client should be deployed
-nfsprovisionername=${nfsprovisionername:''} # The name of the nfs client provisioner
+nfsprovisionername=${nfsprovisionername:''} # The name of the nfs client provisioned
 
 while [ $# -gt 0 ]; do
 
@@ -20,9 +20,10 @@ then
 	exit 254
 fi
 
-rbac=/usr/local/src/nfs-provisioner-rbac.yaml
-deploy=/usr/local/src/nfs-provisioner-deployment.yaml
-sc=/usr/local/src/nfs-provisioner-sc.yaml
+rbac=/usr/local/src/nfs-auto-provisioner-rbac.yaml
+deploy=/usr/local/src/nfs-auto-provisioner-deployment.yaml
+sc=/usr/local/src/nfs-auto-provisioner-sc.yaml
+nfsdel=/usr/local/src/nfs-auto-provisioner-delete.sh
 #
 export PATH=/usr/local/bin:$PATH
 #
@@ -52,8 +53,10 @@ if oc get project ${ocpns} -o jsonpath={.metadata.name} > /dev/null 2>&1 ; then
 fi
 #
 ## Update the the deployment, storage class, and rbac manifest files before deploying to the cluster
-sed -i "s/NFS_PROVISIONER_NAME/${nfsprovisionername}/" ${deploy} ${sc}
-sed -i "s/NFS_PROVISIONER_NAMESPACE/${ocpns}/" ${deploy} ${rbac}
+sed -i "s/NFS_PROV_NM/${nfsprovisionername}/" ${deploy} ${sc}
+sed -i "s/NFS_NS/${ocpns}/" ${deploy} ${rbac}
+
+sed -i "s/NFS_NS/${ocpns}/" ${nfsdel}
 
 ## Deploy
 oc new-project ${ocpns}

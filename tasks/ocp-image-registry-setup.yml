@@ -1,0 +1,18 @@
+---
+- hosts: all
+  vars_files:
+    - ../vars/nfs-config.yml 
+   
+  tasks:
+    - name: Copy the test PVC file to test the NFS server
+      copy:
+        src: ../files/registry-pvc.yaml
+        dest: /usr/local/src/registry-pvc.yaml
+        mode: '0555'
+        
+    - name: Create the test pvc and test pod
+      shell: |
+        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
+        oc create -f /usr/local/src/registry-pvc.yaml -n openshift-image-registry
+        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"pvc":{ "claim": "registry-pvc"}}}}'
+        
